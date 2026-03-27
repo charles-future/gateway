@@ -1,0 +1,28 @@
+{
+  "name": "tailwind",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "concurrently \"npm run watch-docs\" \"astro dev\"",
+    "prebuild": "node scripts/collect-docs.js",
+    "build": "astro build",
+    "prepreview": "node scripts/collect-docs.js",
+    "preview": "astro preview",
+    "preastro": "node scripts/collect-docs.js",
+    "astro": "astro",
+    "collect-docs": "node scripts/collect-docs.js",
+    "watch-docs": "node scripts/collect-docs.js --watch"
+  },
+  "dependencies": {
+    "@astrojs/react": "^4.1.0",
+    "@astrojs/starlight": "^0.29.3",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "astro": "^4.16.18",
+    "concurrently": "^8.2.2",
+    "glob": "^10.3.10",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "sharp": "^0.33.2"
+  }
+}

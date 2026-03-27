@@ -1,0 +1,16 @@
+name: Release Docker Branch
+
+on:
+  push:
+    branches: [ '**', '!main' ]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  release:
+    uses: ./.github/workflows/build-docker.yml
+    with:
+      version: ${{ github.ref_name }}
+

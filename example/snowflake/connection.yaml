@@ -1,0 +1,8 @@
+# (TODO) Replace with your snowflake config
+account: YHFCEQW-VS84270
+user: GATEWAYCI
+password: gatewayCI406PM1
+database: GOCI
+schema: PUBLIC
+warehouse: COMPUTE_WH
+role: ACCOUNTADMIN

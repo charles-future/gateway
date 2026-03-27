@@ -1,0 +1,16 @@
+name: Release Docker
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  release:
+    uses: ./.github/workflows/build-docker.yml
+    with:
+      version: ${{ github.event.release.tag_name }}
+

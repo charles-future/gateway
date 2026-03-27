@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    restart: unless-stopped
+    environment:
+      COLLECTOR_OTLP_ENABLED: true
+    ports:
+      - "16686:16686" # Jaeger UI
+      - "14250:14250" # Jaeger GRPC
+      - "14268:14268" # OTLP HTTP
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # OTLP Protobuf or OTLP JSON
+
+  presidio-anonymizer:
+    image: mcr.microsoft.com/presidio-anonymizer:latest
+    container_name: anonymizer
+    ports:
+      - "5001:3000"
+
+  presidio-analyzer:
+    image: mcr.microsoft.com/presidio-analyzer:latest
+    container_name: analyzer
+    ports:
+      - "5002:3000"
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./csv:/var/lib/postgresql/csv
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # Mount the seed data script
+
+
+  gateway:
+    build:
+      context: ../..
+      dockerfile: Dockerfile.build
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    command:
+      - start
+      - --config
+      - /usr/local/bin/config.yaml
+      - --addr
+      - ":8182"
+      - rest
+    depends_on:
+      - postgres
+    ports:
+      - "8182:8182"
+    volumes:
+      - ./config.yaml:/usr/local/bin/config.yaml
+
+
+volumes:
+  postgres_data:

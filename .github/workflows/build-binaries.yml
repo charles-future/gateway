@@ -1,0 +1,114 @@
+name: Build Binaries
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    env:
+      VERSION: ${{ github.event.release.tag_name || github.sha }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.23'
+          cache: true
+
+      - name: Build Binaries
+        run: |
+          # Linux builds
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o gateway-linux-amd64 .
+          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o gateway-linux-arm64 .
+          # macOS builds
+          CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o gateway-darwin-amd64 .
+          CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o gateway-darwin-arm64 .
+          # Windows builds
+          CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o gateway-windows-amd64.exe .
+          CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build -o gateway-windows-arm64.exe .
+
+      - name: Create Binary Archives
+        run: |
+          # Create archives for each platform
+          tar -czf gateway-linux-amd64.tar.gz gateway-linux-amd64
+          tar -czf gateway-linux-arm64.tar.gz gateway-linux-arm64
+          tar -czf gateway-darwin-amd64.tar.gz gateway-darwin-amd64
+          tar -czf gateway-darwin-arm64.tar.gz gateway-darwin-arm64
+          zip gateway-windows-amd64.zip gateway-windows-amd64.exe
+          zip gateway-windows-arm64.zip gateway-windows-arm64.exe
+
+      - name: Upload Binaries
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./gateway-linux-amd64.tar.gz
+          asset_name: gateway-linux-amd64.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload ARM64 Linux Binary
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./gateway-linux-arm64.tar.gz
+          asset_name: gateway-linux-arm64.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload macOS AMD64 Binary
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./gateway-darwin-amd64.tar.gz
+          asset_name: gateway-darwin-amd64.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload macOS ARM64 Binary
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./gateway-darwin-arm64.tar.gz
+          asset_name: gateway-darwin-arm64.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload Windows AMD64 Binary
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./gateway-windows-amd64.zip
+          asset_name: gateway-windows-amd64.zip
+          asset_content_type: application/zip
+
+      - name: Upload Windows ARM64 Binary
+        if: github.event_name == 'release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./gateway-windows-arm64.zip
+          asset_name: gateway-windows-arm64.zip
+          asset_content_type: application/zip 

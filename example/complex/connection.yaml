@@ -1,0 +1,8 @@
+type: postgres
+hosts:
+  - localhost
+user: postgres
+password: mysecretpassword
+database: postgres
+port: 5432
+schema: cd

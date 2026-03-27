@@ -1,0 +1,7 @@
+type: postgres
+hosts:
+  - postgres
+user: postgres
+password: postgres
+database: mydb
+port: 5432
